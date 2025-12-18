@@ -1,24 +1,22 @@
-# Node.js/TypeScript
-node_modules/
-dist/
-build/
-*.log
-.env*
-
-# Python
+# Python-specific ignores
 __pycache__/
 *.pyc
 .venv/
 venv/
+dist/
+*.egg-info/
 
-# Universal
+# Environment variables
+.env
+.env.*
 .DS_Store
-Thumbs.db
-*.tmp
-*.swp
-.vscode/
-.idea/
 
-# Docusaurus
-.docusaurus/
-.cache/
+# Logs and databases
+*.log
+*.sqlite3
+
+# Test and build artifacts
+.coverage
+.mypy_cache/
+.pytest_cache/
+htmlcov/

@@ -1,174 +1,107 @@
-# Physical AI & Humanoid Robotics
+# RAG Chatbot Backend
 
-An interactive educational platform for learning Physical AI and Humanoid Robotics, featuring a Docusaurus-based textbook with an integrated RAG-powered AI chatbot.
+This is the backend service for the RAG Chatbot, built with FastAPI. It handles document ingestion, vector embedding, Qdrant interaction, and chat responses using the OpenAI API.
 
-## Overview
+## Features
 
-This project bridges the gap between digital AI and physical robotics, teaching students to design, simulate, and deploy humanoid robots using ROS 2, Gazebo, and NVIDIA Isaac. The platform includes:
-
-- **Interactive Textbook**: Docusaurus-powered documentation with the 5-Step Concept Loop pedagogy
-- **RAG Chatbot**: AI assistant that answers questions based on textbook content
-- **Personalization**: User authentication, progress tracking, and content translation
-
-## Project Structure
-
-```
-├── physical-ai-textbook/     # Docusaurus frontend
-│   ├── docs/                 # Course content (MDX)
-│   │   ├── module-01/        # ROS 2 Fundamentals
-│   │   ├── module2/          # Gazebo & Unity Simulation
-│   │   ├── module3/          # NVIDIA Isaac Platform
-│   │   └── module4/          # Vision-Language-Action
-│   └── src/
-│       ├── components/       # React components (Chat, Auth)
-│       └── theme/            # Custom Docusaurus theme
-├── rag_chatbot/              # FastAPI backend
-│   └── src/
-│       ├── api/              # REST endpoints
-│       ├── services/         # Business logic
-│       └── models/           # Data models
-├── specs/                    # Feature specifications
-├── history/
-│   ├── adr/                  # Architecture Decision Records
-│   └── prompts/              # Implementation prompts
-└── .claude/                  # Claude Code configuration
-    ├── agents/               # Specialized AI agents
-    ├── skills/               # Agent skill definitions
-    └── commands/             # Custom commands
-```
-
-## Course Modules
-
-| Module | Topic | Focus |
-|--------|-------|-------|
-| 1 | ROS 2 Fundamentals | Nodes, Topics, Services, URDF |
-| 2 | Gazebo & Unity | Physics simulation, Digital twins |
-| 3 | NVIDIA Isaac | Perception, VSLAM, Navigation |
-| 4 | Vision-Language-Action | LLM integration, Conversational robotics |
+-   **Document Ingestion**: Processes markdown files from the `physical-ai-textbook/docs/` directory, chunks them by headers, creates embeddings, and stores them in a Qdrant vector database.
+-   **Chat Endpoint**: Provides a streaming API for answering questions based on the ingested textbook content.
+-   **API Key Security**: Secures endpoints with a pre-shared API key.
+-   **Chat History Logging**: Logs all user-AI interactions to a Neon Postgres database.
 
 ## Tech Stack
 
-**Frontend (Docusaurus)**
-- React 18 + TypeScript
-- Docusaurus 3.x
-- MDX for interactive content
-- Custom theme with dark mode
+-   **Framework**: FastAPI
+-   **ASGI Server**: Uvicorn
+-   **Environment Management**: python-dotenv
+-   **Data Validation**: Pydantic
+-   **Vector Database**: Qdrant-client
+-   **LLM Integration**: OpenAI Python Library
+-   **HTML Parsing**: beautifulsoup4 (for future potential use in document loading)
+-   **PostgreSQL Driver**: psycopg2-binary
+-   **Database**: Neon Serverless Postgres (for chat history)
 
-**Backend (RAG Chatbot)**
-- FastAPI + Python 3.12
-- Qdrant vector database
-- Google Gemini API (embeddings + chat)
-- Neon Postgres (chat history)
+## Setup
 
-## Quick Start
+### Prerequisites
 
-### Frontend (Textbook)
+-   Python 3.12+
+-   `pip` for package installation
+-   Access to OpenAI, Qdrant, and Neon accounts.
 
-```bash
-cd physical-ai-textbook
-npm install
-npm run start
-```
+### Environment Variables
 
-Access at `http://localhost:3000`
-
-### Backend (RAG Chatbot)
+Create a `.env` file in the `rag_chatbot/` directory. You can use the provided `.env.example` as a template:
 
 ```bash
-cd rag_chatbot
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-
-# Configure environment
 cp .env.example .env
-# Edit .env with your API keys
-
-# Run server
-python run.py
 ```
 
-Access API at `http://localhost:8000/docs`
+Now, fill in the values in the `.env` file:
 
-### Ingest Textbook Content
+```ini
+OPENAI_API_KEY="sk-..."                     # Your OpenAI API Key
+QDRANT_URL="https://your-qdrant-url.cloud"  # Your Qdrant Cloud URL
+QDRANT_API_KEY="..."                        # Your Qdrant Cloud API Key
+NEON_DB_URL="postgres://..."                # Your Neon Postgres Database URL
+API_KEY="a-secure-random-string"            # A secure, random string for API access
+```
+
+**Important**: Ensure all required environment variables are set. The application will raise an error if any are missing.
+
+### Install Dependencies
+
+It is recommended to use a Python virtual environment.
 
 ```bash
-curl -X POST http://localhost:8000/ingest -H "X-API-Key: your-api-key"
+# Navigate to the backend directory
+cd rag_chatbot
+
+# Create a virtual environment (if you haven't already)
+python -m venv .venv
+source .venv/bin/activate  # On Linux/macOS
+# .venv\Scripts\activate   # On Windows
+
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-## Environment Variables
+## Running the Application
 
-### Backend (.env)
-```ini
-GEMINI_API_KEY=your-gemini-key
-QDRANT_URL=https://your-qdrant-url
-QDRANT_API_KEY=your-qdrant-key
-NEON_DB_URL=postgres://...
-API_KEY=your-secure-api-key
-```
+### 1. Start the Server
 
-### Frontend (.env)
-```ini
-REACT_APP_API_URL=http://localhost:8000
-```
-
-## Feature Specifications
-
-| Spec | Feature | Status |
-|------|---------|--------|
-| 001 | RAG Chat UI Integration (Initial) | Completed |
-| 002 | RAG Chat UI Integration (Full) | Completed |
-| 002 | RAG Chatbot Backend | Completed |
-| 003 | Gemini API Migration | Completed |
-| 004 | RAG Vector Retrieval Fix | Completed |
-| 005 | Website Redesign & UI | Completed |
-
-## Hardware Requirements
-
-For full course experience with simulation:
-
-**Workstation**
-- GPU: NVIDIA RTX 4070 Ti+ (12GB VRAM)
-- CPU: Intel i7 13th Gen+ / AMD Ryzen 9
-- RAM: 64GB DDR5
-- OS: Ubuntu 22.04 LTS
-
-**Edge Kit (Optional)**
-- NVIDIA Jetson Orin Nano (8GB)
-- Intel RealSense D435i
-- ReSpeaker USB Mic Array
-
-## Development
-
-### Claude Code Agents
-
-The project includes specialized AI agents:
-- `physical-ai-author`: Textbook content generation
-- `fastapi-specialist`: Backend development
-- `react-frontend-specialist`: UI components
-- `rag-backend-engineer`: RAG pipeline
-- `docusaurus-architect-specialist`: Site architecture
-
-### Custom Commands
+From the `rag_chatbot/` directory, use `uvicorn` to run the FastAPI application:
 
 ```bash
-# Generate spec
-/sp.specify
-
-# Create implementation plan
-/sp.plan
-
-# Generate ADR
-/sp.adr
+uvicorn main:app --reload
 ```
 
-## License
+The API will be available at `http://localhost:8000`. You can access the FastAPI interactive documentation at `http://localhost:8000/docs`.
 
-MIT
+### 2. Run Document Ingestion
 
-## Contributing
+To populate the vector database with textbook content, send a POST request to the `/ingest` endpoint. This process runs in the background.
 
-1. Create a feature spec in `specs/`
-2. Implement following the spec
-3. Document decisions in `history/adr/`
-4. Submit PR with linked spec
+```bash
+curl -X POST http://localhost:8000/ingest \
+-H "X-API-Key: your-api-key"
+```
+Replace `your-api-key` with the value set in your `.env` file.
+
+### 3. Test the Chat Endpoint
+
+Once ingestion is complete, you can test the chat functionality:
+
+```bash
+curl -X POST http://localhost:8000/api/chat \
+-H "Content-Type: application/json" \
+-H "X-API-Key: your-api-key" \
+-d 
+{
+  "message": "What is Physical AI?",
+  "history": []
+}
+```
+Replace `your-api-key` with the value set in your `.env` file. The response will be streamed.
+
+---
